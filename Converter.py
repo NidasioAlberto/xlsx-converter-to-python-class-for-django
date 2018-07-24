@@ -1,6 +1,7 @@
 from openpyxl import load_workbook
 from collections import namedtuple
 from fuzzywuzzy import fuzz
+import inspect
 
 wb = load_workbook(filename='./Sample-data-2.xlsx', read_only=True)
 
@@ -8,8 +9,21 @@ wb = load_workbook(filename='./Sample-data-2.xlsx', read_only=True)
 
 ws = wb['Foglio1']
 
-#expected headers, this list is provided by YOU
-expectedHeaders = ['clientId', 'reportNo', 'clientContact', 'sampleRef', 'dateReceived', 'sampleId', 'sampleReportNumber', 'clientReference', 'alluminium', 'totalColiforms']
+#get expected headers from the class
+
+class GivenClass:
+    clientId = ""
+    reportNo = ""
+    clientContact = ""
+    sampleRef = ""
+    dateReceived = ""
+    sampleID = ""
+    sampleReportNumber = ""
+    clientReference = ""
+    alluminium = ""
+    totalColiforms = ""
+
+expectedHeaders = [b[0] for b in [a for a in inspect.getmembers(GivenClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]
 
 #headers and table data
 headers = []
@@ -83,7 +97,7 @@ for row in data:
     if row:
         for header in headersPairs:
             #print(str(header))
-            tmp.append((header[0], row[headers.index(header[0])]))
+            tmp.append((header[1], row[headers.index(header[0])]))
 
         pairedData.append(tmp)
 
