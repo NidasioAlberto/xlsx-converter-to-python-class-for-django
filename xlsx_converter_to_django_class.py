@@ -1,0 +1,112 @@
+from openpyxl import load_workbook
+from collections import namedtuple
+from fuzzywuzzy import fuzz
+import inspect
+
+def convertXlsxToDjangoClass(GivenClass, filePath, sheetName="Foglio1"):
+    wb = load_workbook(filename=filePath, read_only=True)
+
+    #print(str(wb.sheetnames))
+
+    ws = wb[sheetName]
+
+    #get expected headers from the class
+
+    expectedHeaders = [b[0] for b in [a for a in inspect.getmembers(GivenClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]
+    #print(str(expectedHeaders))
+
+    #headers and table data
+    headers = []
+    data = []
+
+    #grab the data and the headers
+    for row in ws.rows:
+        if len(headers) == 0:
+            for cell in row:
+                headers.append(cell.value)
+        else:
+            tmp = []
+            for cell in row:
+                tmp.append(cell.value)
+            data.append(tmp)
+
+    #display the data
+    #print("Data: ")
+    #print(len(data))
+
+    #print("headers")
+    #for header in headers:
+    #    print(header)
+
+    #print("data")
+    #for header in headers:
+    #    print(header)
+    #    for row in data:
+    #        print("\t{0}".format(row[headers.index(header)]))
+
+    #evaluate the headers
+    evaluetedHeaders = []
+    headersPairs = [] #(found, expected)
+
+    for expectedHeader in expectedHeaders:
+        tmp = []
+        for header in headers:
+            tmp.append((header, fuzz.ratio(expectedHeader, header)))
+        evaluetedHeaders.append(tmp)
+
+    for evaluation in evaluetedHeaders:
+        #print(evaluation)
+
+        maxElem = evaluation[0]
+        for elem in evaluation:
+            if maxElem[1] < elem[1]:
+                maxElem = elem
+
+        #print(str(maxElem))
+
+        #once the better one has been found delete if from all the other evaluations
+        for evaluation2 in evaluetedHeaders:
+            for header in evaluation2:
+                if header[0] == maxElem[0]:
+                    evaluetedHeaders[evaluetedHeaders.index(evaluation2)].pop(evaluation2.index(header))
+
+        #print(maxElem[0])
+
+        headersPairs.append((maxElem[0], expectedHeaders[evaluetedHeaders.index(evaluation)]))
+
+    #show the headers once evalueted
+    #print(str(headersPairs))
+    #print(str(headers))
+
+    #pair headers with data
+    pairedData = []
+
+    for row in data:
+        tmp = []
+
+        if row:
+            for header in headersPairs:
+                #print(str(header))
+                tmp.append((header[1], row[headers.index(header[0])]))
+
+            pairedData.append(tmp)
+
+    #show final paired data
+    #for row in pairedData:
+    #    print(str(row))
+
+    #put the data into the class
+    toReturn = []
+    for row in pairedData:
+        tmp = GivenClass()
+        for elem in row:
+            setattr(tmp, elem[0], elem[1])
+        toReturn.append(tmp)
+
+    #display the array of classes
+#    for elem in toReturn:
+#        print("element:")
+#        for header in expectedHeaders:
+#            print("{0}: {1}".format(header, getattr(elem, header)))
+
+    return toReturn
