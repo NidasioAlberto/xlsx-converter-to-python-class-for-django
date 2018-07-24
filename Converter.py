@@ -24,6 +24,7 @@ class GivenClass:
     totalColiforms = ""
 
 expectedHeaders = [b[0] for b in [a for a in inspect.getmembers(GivenClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]
+print(str(expectedHeaders))
 
 #headers and table data
 headers = []
@@ -102,5 +103,19 @@ for row in data:
         pairedData.append(tmp)
 
 #show final paired data
+#for row in pairedData:
+#    print(str(row))
+
+#put the data into the class
+toReturn = []
 for row in pairedData:
-    print(str(row))
+    tmp = GivenClass()
+    for elem in row:
+        setattr(tmp, elem[0], elem[1])
+    toReturn.append(tmp)
+
+#display the array of classes
+for elem in toReturn:
+    print("element:")
+    for header in expectedHeaders:
+        print("{0}: {1}".format(header, getattr(elem, header)))
