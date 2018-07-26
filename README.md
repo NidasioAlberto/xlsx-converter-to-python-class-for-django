@@ -1,1 +1,1 @@
-This code converts an xlsx spreadsheet into a pytohn class for django
+This code converts an xlsx spreadsheet into a python class for django
