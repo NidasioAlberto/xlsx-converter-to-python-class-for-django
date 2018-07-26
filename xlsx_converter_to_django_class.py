@@ -73,7 +73,9 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
                 if evaluetedHeaders[i][sortedEvaluatedHeaders[i][k][0]] < evaluetedHeaders[l][sortedEvaluatedHeaders[i][k][0]]:
                     bigger = False
             if bigger:
-                # print("element found for {0}: {1}".format(expectedHeaders[i], headers[sortedEvaluatedHeaders[i][k][0]]))
+                #print("element found for {0}: {1} {2} score: {3}".format(expectedHeaders[i], headers[sortedEvaluatedHeaders[i][k][0]], sortedEvaluatedHeaders[i][k][0], evaluetedHeaders[i][sortedEvaluatedHeaders[i][k][0]] ))
+                # if sortedEvaluatedHeaders[i][k][0] == 140:
+                #     print('hey')
                 headerPairs.append((i, sortedEvaluatedHeaders[i][k][0])) #(expected header index, actual header index)
                 break
             # else:
@@ -88,6 +90,7 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
             for headerPair in headerPairs:
                 tmp1 = expectedHeaders[headerPair[0]]
                 tmp3 = headerPair[1]
+                #print(tmp3)
                 tmp2 = row[tmp3]
                 tmp.append((tmp1, tmp2))
             # print(str(tmp))
@@ -98,7 +101,7 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
     for row in pairedData:
         tmp = GivenClass()
         for elem in row:
-            setattr(tmp, elem[0], elem[1])
+            setattr(tmp, elem[0], str(elem[1]))
         toReturn.append(tmp)
 
     #display the array of classes

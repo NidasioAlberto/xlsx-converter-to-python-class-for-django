@@ -26,6 +26,6 @@ parsedData = convertXlsxToDjangoClass(DjangoClass, filePathExample, headerLimit=
 
 #show the results
 for elem in parsedData:
-        print("element:")
-        for header in [b[0] for b in [a for a in inspect.getmembers(DjangoClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]:
-            print("\t{0}: {1}".format(header, getattr(elem, header)))
+    print("element:")
+    for header in [b[0] for b in [a for a in inspect.getmembers(DjangoClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]:
+        print("\t{0}: {1}".format(header, getattr(elem, header)))
