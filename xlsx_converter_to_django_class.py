@@ -6,7 +6,7 @@ import inspect
 def takeSecond(elem):
     return elem[1]
 
-def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
+def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1, expectedHeaders=None):
     #0: initializing variables
     headers = []
     data = []
@@ -16,7 +16,8 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
     pairedData = [] #[(expected header, value), ...]
 
     #1: get expected headers from the class
-    expectedHeaders = [b[0] for b in [a for a in inspect.getmembers(GivenClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]
+    if not expectedHeaders:
+        expectedHeaders = [b[0] for b in [a for a in inspect.getmembers(GivenClass, lambda a:not(inspect.isroutine(a))) if not(a[0].startswith('__') and a[0].endswith('__'))]]
 
     #2: load the worksheet
     wb = load_workbook(filename=filePath, read_only=True)
@@ -73,7 +74,7 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1):
                 if evaluetedHeaders[i][sortedEvaluatedHeaders[i][k][0]] < evaluetedHeaders[l][sortedEvaluatedHeaders[i][k][0]]:
                     bigger = False
             if bigger:
-                #print("element found for {0}: {1} {2} score: {3}".format(expectedHeaders[i], headers[sortedEvaluatedHeaders[i][k][0]], sortedEvaluatedHeaders[i][k][0], evaluetedHeaders[i][sortedEvaluatedHeaders[i][k][0]] ))
+                # print("element found for {0}: {1} {2} score: {3}".format(expectedHeaders[i], headers[sortedEvaluatedHeaders[i][k][0]], sortedEvaluatedHeaders[i][k][0], evaluetedHeaders[i][sortedEvaluatedHeaders[i][k][0]] ))
                 # if sortedEvaluatedHeaders[i][k][0] == 140:
                 #     print('hey')
                 headerPairs.append((i, sortedEvaluatedHeaders[i][k][0])) #(expected header index, actual header index)

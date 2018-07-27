@@ -22,7 +22,7 @@ class DjangoClass:
 filePathExample = "./Sample-data-3.xlsx"
  
 #get the data with the library
-parsedData = convertXlsxToDjangoClass(DjangoClass, filePathExample, headerLimit=30)
+parsedData = convertXlsxToDjangoClass(DjangoClass, filePathExample, expectedHeaders=["alluminium", "clientId"])
 
 #show the results
 for elem in parsedData:
