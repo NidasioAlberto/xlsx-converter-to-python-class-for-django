@@ -18,11 +18,21 @@ class DjangoClass:
     sampleID = ""
     totalColiforms = ""
 
+    result0 = ""
+    testId0 = ""
+    result1 = ""
+    testId1 = ""
+    result2 = ""
+    testId2 = ""
+
 #define the path for the file to read
-filePathExample = "./Sample-data-3.xlsx"
+filePathExample = "./Sample-data-4.xlsx"
+
+#repetitiveColumns structure: ((List of headers that repeats), (((first list of params), (second list of parameters), ...)))
+#for this example: (("Result", "Test ID"), ((('result0', 'testId0'), ('result1', 'testId1'), ('result2', 'testId2'))))
  
 #get the data with the library
-parsedData = convertXlsxToDjangoClass(DjangoClass, filePathExample, expectedHeaders=["alluminium", "clientId"])
+parsedData = convertXlsxToDjangoClass(DjangoClass, filePathExample, expectedHeaders=["alluminium", "clientId"], repetitiveColumns=(("Result", "Test ID"), ((('result0', 'testId0'), ('result1', 'testId1'), ('result2', 'testId2')))))
 
 #show the results
 for elem in parsedData:

@@ -6,8 +6,9 @@ import inspect
 def takeSecond(elem):
     return elem[1]
 
-def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1, expectedHeaders=None):
+def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1, expectedHeaders=None, repetitiveColumns=None):
     #0: initializing variables
+    allHeaders = []
     headers = []
     data = []
     evaluetedHeaders = [] #[expected][actual]
@@ -25,17 +26,20 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1, ex
     
     #3: grab the data and the headers from the worksheet
     for row in ws.rows:
-        if len(headers) == 0:
+        if len(allHeaders) == 0:
             for cell in row:
-                if headerLimit < 1:
-                    headers.append(cell.value)
-                elif headerLimit > len(headers):
-                    headers.append(cell.value)
+                    allHeaders.append(cell.value)
         else:
             tmp = []
             for cell in row:
                 tmp.append(cell.value)
-            data.append(tmp)
+            if len(tmp) > 0:
+                data.append(tmp)
+    
+    if headerLimit > 0:
+        headers = allHeaders[:headerLimit]
+    else:
+        headers = allHeaders
     
     #4: evaluate the headers
     for expectedHeader in expectedHeaders: #for each expeced header
@@ -110,5 +114,50 @@ def convertXlsxToDjangoClass(GivenClass, filePath, sheetNo=0, headerLimit=-1, ex
     #    print("element:")
     #    for header in expectedHeaders:
     #        print("{0}: {1}".format(header, getattr(elem, header)))
+
+    #9: collect data inside repetitive columns
+    if repetitiveColumns != None: #(("Result", "Test ID"), (("chem_value00", "checm_name00"), ...))
+        print(str(repetitiveColumns))
+        indexes = []
+        start = -1
+        first = ""
+        jumpSize = -1
+        for i in range(0, len(allHeaders)):
+            # print("current {0} first {1}".format(i, first))
+            if first != "":
+                if first == allHeaders[i]:
+                    jumpSize = i - start
+                    break
+                if allHeaders[i] in repetitiveColumns[0]:
+                    # print("hey {0}".format(allHeaders[i]))
+                    indexes.append(repetitiveColumns[0].index(allHeaders[i]))
+
+            if allHeaders[i] in repetitiveColumns[0] and first == "":
+                # print("hey {0}".format(allHeaders[i]))
+                indexes.append(repetitiveColumns[0].index(allHeaders[i]))
+                first = allHeaders[i]
+                start = i
+
+        # print(str(indexes))
+        # print("start: {0}".format(start))
+        # print("first: {0}".format(first))
+        # print("jumpSize: {0}".format(jumpSize))
+        # print("")
+
+        # for i in range(0, min([len(repetitiveColumns[1])*len(indexes), len(allHeaders) - start])):
+        #     print("{0}\t{1}".format(repetitiveColumns[0][indexes[(i) % len(indexes)]], repetitiveColumns[1][int(i/2)][indexes[(i) % len(indexes)]]))
+
+        # print(str(data))
+        # print(len(data))
+        # print(len(toReturn))
+
+        for j in range(0, len(toReturn)):
+            if len(data[j]) >= start + min([len(repetitiveColumns[1])*len(indexes), len(allHeaders) - start]) and len(data[j]) > 0:
+                for i in range(0, min([len(repetitiveColumns[1])*len(indexes), len(allHeaders) - start])):
+                    #print("\t{0}:\t{1}".format(repetitiveColumns[1][int(i/2)][indexes[(i) % len(indexes)]], data[j][i + start]))
+
+                    #print(j)
+                    setattr(toReturn[j], repetitiveColumns[1][int(i/2)][indexes[(i) % len(indexes)]], str(data[j][i + start]))
+
 
     return toReturn
